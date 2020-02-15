@@ -3,52 +3,61 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class TransactionList extends StatelessWidget {
-
   final List<Transaction> list;
+  final Function _deleteTr;
 
-  TransactionList(this.list);
+  TransactionList(this.list, this._deleteTr);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 350,
-      child: ListView.builder(
-        itemBuilder: (context, index) {
-          return Card(
-            child: Row(
-              children: <Widget>[
+        height: 450,
+        child: list.isNotEmpty
+            ? ListView.builder(
+                itemBuilder: (context, index) {
+                  return Card(
+                    elevation: 5,
+                    margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        radius: 30,
+                        child: Padding(
+                          padding: EdgeInsets.all(6),
+                          child: FittedBox(
+                            child: Text('\$${list[index].amount}'),
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        list[index].title,
+                        style: Theme.of(context).textTheme.title,
+                      ),
+                      subtitle:
+                          Text(DateFormat.yMMMd().format(list[index].date)),
+                      trailing: IconButton(
+                        icon: Icon(
+                          Icons.delete,
+                          color: Theme.of(context).errorColor,
+                        ),
+                        onPressed: () => _deleteTr(list[index].id),
+                      ),
+                      //trailing: ,
+                    ),
+                  );
+                },
+                itemCount: list.length,
+              )
+            : Column(children: <Widget>[
+                Text('No transactions'),
+                SizedBox(
+                  height: 20.0,
+                ),
                 Container(
-                  child: Text('\$ ${list[index].amount.toStringAsFixed(2)}',
-                    style: TextStyle(fontWeight: FontWeight.w500,
-                        fontSize: 20,
-                        color: Colors.purple),),
-                  margin: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.purple, width: 2),
-                  ),
-                  padding: EdgeInsets.all(10),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(list[index].title, style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 18,
-                        color: Colors.black
-                    ),),
-                    Text(
-                      DateFormat.yMMMd().format(
-                          list[index].date), style: TextStyle(
-                        color: Colors.grey, fontWeight: FontWeight.w400),)
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
-        itemCount: list.length,
-
-      ),
-    );
+                    height: 200,
+                    child: Image.asset(
+                      'assets/images/waiting.png',
+                      fit: BoxFit.cover,
+                    )),
+              ]));
   }
 }
