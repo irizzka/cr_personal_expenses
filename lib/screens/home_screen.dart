@@ -13,7 +13,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
 
   final List<Transaction> _transactions = [
@@ -40,6 +40,23 @@ class _MyHomePageState extends State<MyHomePage> {
     Navigator.of(context).pop();
   }
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print(state);
+  }
+
+  @override
+  dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
   List<Transaction> get _recentTransactions {
     return _transactions.where((tx){
       return tx.date.isAfter(DateTime.now().subtract(Duration(days: 7)));
@@ -61,22 +78,35 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+
   Widget build(BuildContext context) {
+    print('build_home');
+    final appBar = AppBar(
+      actions: <Widget>[
+        IconButton(
+          onPressed: () => _startAddNewTransaction(context),
+          icon: Icon(Icons.add),
+        )
+      ],
+      title: Text(widget.title),
+    );
+
+    final txListWidget =  Container(
+        height: (MediaQuery.of(context).size.height - appBar.preferredSize.height -
+            MediaQuery.of(context).padding.top) * 0.7,
+        child: TransactionList(_transactions, _deleteTransaction));
+
     return Scaffold(
-      appBar: AppBar(
-        actions: <Widget>[
-          IconButton(
-            onPressed: () => _startAddNewTransaction(context),
-            icon: Icon(Icons.add),
-          )
-        ],
-        title: Text(widget.title),
-      ),
+      appBar:appBar,
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            Chart(_recentTransactions),
-            TransactionList(_transactions, _deleteTransaction),
+            Container(
+                height: (MediaQuery.of(context).size.height
+                - appBar.preferredSize.height -
+                MediaQuery.of(context).padding.top) * 0.3,
+                child: Chart(_recentTransactions)),
+           txListWidget,
           ],
         ),
       ),
